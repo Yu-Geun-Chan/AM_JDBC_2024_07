@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.koreait'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.12'
+}
+
+test {
+    useJUnitPlatform()
+}
