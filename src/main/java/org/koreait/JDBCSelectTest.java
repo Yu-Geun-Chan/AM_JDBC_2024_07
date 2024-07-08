@@ -1,11 +1,8 @@
 package org.koreait;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
-public class JDBCInsertTest {
+public class JDBCSelectTest {
     public static void main(String[] args) {
         Connection conn = null;
         PreparedStatement pstmt = null; // Insert Quary를 하려면 필요하다.
@@ -16,18 +13,21 @@ public class JDBCInsertTest {
             conn = DriverManager.getConnection(url, "root", "");
             System.out.println("연결 성공!");
 
-            String sql = "INSERT INTO article ";
-            sql += "SET regDate = DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s'),";
-            sql += "updateDate = DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s'),";
-            sql += "title = CONCAT ('제목', SUBSTRING(RAND() * 1000 FROM 1 FOR 2)),";
-            sql += "`body` = CONCAT ('내용', SUBSTRING(RAND() * 1000 FROM 1 FOR 2));";
-
+            String sql = "SELECT id, regDate, title, body FROM article ";
             pstmt = conn.prepareStatement(sql);
 
-            int affectedRows = pstmt.executeUpdate(); // 몇 열이 적용됐는지
+            ResultSet rs = pstmt.executeQuery();
 
-            System.out.println("affected rows: " + affectedRows);
+            System.out.println("  번호  /    작성일     /    제목    /    내용    ");
+            System.out.println("=".repeat(50));
+            while (rs.next()) {
+                if (rs.getString(2).split(" ")[0].equals(Util.getNow().split(" ")[0])) {
+                    System.out.printf("   %d   /   %s   /   %s   /   %s      \n",(rs.getInt(1)), rs.getString(2).split(" ")[1], rs.getString(3), rs.getString(4));
+                } else  System.out.printf("   %d   /   %s   /   %s   /   %s      \n",(rs.getInt(1)), rs.getString(2).split(" ")[0], rs.getString(3), rs.getString(4));
+            }
 
+            rs.close();
+            pstmt.close();
         } catch (ClassNotFoundException e) {
             System.out.println("드라이버 로딩 실패" + e);
         } catch (SQLException e) {
