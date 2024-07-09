@@ -229,7 +229,6 @@ public class Main {
                 Connection conn = null;
                 PreparedStatement pstmt = null;// Insert Quary를 하려면 필요하다.
                 ResultSet rs = null;
-                int foundArticleId = 0;
 
                 try {
                     Class.forName("org.mariadb.jdbc.Driver");
@@ -249,6 +248,8 @@ public class Main {
                     String sql = "SELECT * FROM article WHERE id = " + id + ";";
                     pstmt = conn.prepareStatement(sql);
                     rs = pstmt.executeQuery(sql);
+
+                    int foundArticleId = 0;
 
                     while (rs.next()) {
                         if (rs.getInt("id") == id) {
@@ -296,6 +297,84 @@ public class Main {
                     }
                 }
 
+            } else if (cmd.startsWith("article detail")) {
+                Connection conn = null;
+                PreparedStatement pstmt = null;// Insert Quary를 하려면 필요하다.
+                ResultSet rs = null;
+
+                try {
+                    Class.forName("org.mariadb.jdbc.Driver");
+                    String url = "jdbc:mariadb://127.0.0.1:3306/JDBC?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul";
+                    conn = DriverManager.getConnection(url, "root", "");
+
+                    String[] cmdBits = cmd.split(" ");
+
+                    int id;
+                    try {
+                        id = Integer.parseInt(cmdBits[2]);
+                    } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                        System.out.println("숫자를 입력하세요.");
+                        continue;
+                    }
+
+                    String sql = "SELECT * FROM article WHERE id = " + id + ";";
+                    pstmt = conn.prepareStatement(sql);
+                    rs = pstmt.executeQuery(sql);
+
+                    int foundArticleId = 0;
+
+                    while (rs.next()) {
+                        if (rs.getInt("id") == id) {
+                            foundArticleId = id;
+                        }
+                    }
+                    if (foundArticleId == 0) {
+                        System.out.printf("%d번 게시글은 없습니다.\n", id);
+                        continue;
+                    }
+
+                    sql = "SELECT * FROM article WHERE id = " + id + ";";
+                    pstmt = conn.prepareStatement(sql);
+                    rs = pstmt.executeQuery(sql);
+
+                    if (rs.next()) {
+                        System.out.printf("번호 : %d\n", rs.getInt("id"));
+                        System.out.printf("작성날짜 : %s\n", rs.getString("regDate"));
+                        System.out.printf("수정날짜 : %s\n", rs.getString("updateDate"));
+                        System.out.printf("제목 : %s\n", rs.getString("title"));
+                        System.out.printf("내용 : %s\n", rs.getString("body"));
+                    }
+
+                } catch (ClassNotFoundException e) {
+                    System.out.println("드라이버 로딩 실패" + e);
+                } catch (SQLException e) {
+                    System.out.println("에러 : " + e);
+                } finally {
+                    try {
+                        if (rs != null && !rs.isClosed()) {
+                            rs.close();
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        if (pstmt != null && !pstmt.isClosed()) {
+                            pstmt.close();
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        if (conn != null && !conn.isClosed()) {
+                            conn.close();
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            } else {
+                System.out.println("올바르지 않은 명령어입니다.");
             }
         }
         System.out.println("==프로그램 종료==");
