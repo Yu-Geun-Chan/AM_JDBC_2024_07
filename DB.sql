@@ -29,4 +29,4 @@ title = CONCAT ('제목', SUBSTRING(RAND() * 1000 FROM 1 FOR 2)),
 
 SELECT * FROM article;
 
-SELECT id, regDate, title, body FROM article
+SELECT id, regDate, title, body FROM article;
