@@ -31,7 +31,7 @@ public class App {
             try {
                 conn = DriverManager.getConnection(url, "root", "");
 
-                int actionResult = doAction(conn, sc, cmd);
+                int actionResult = action(conn, sc, cmd);
 
                 if (actionResult == -1) {
                     System.out.println("== 프로그램 종료 ==");
@@ -53,13 +53,14 @@ public class App {
         }
     }
 
-    private static int doAction(Connection conn, Scanner sc, String cmd) {
-        ArticleController articleController = new ArticleController(sc, conn);
-        MemberController memberController = new MemberController(sc, conn);
+    private static int action(Connection conn, Scanner sc, String cmd) {
         if (cmd.equals("exit")) {
             System.out.println("== 프로그램 종료 ==");
             return -1;
         }
+
+        ArticleController articleController = new ArticleController(sc, conn);
+        MemberController memberController = new MemberController(sc, conn);
 
         if (cmd.equals("article write")) {
             articleController.doWrite();
