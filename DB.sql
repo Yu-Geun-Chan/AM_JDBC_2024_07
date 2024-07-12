@@ -1,5 +1,6 @@
-CREATE DATABASE AM_JDBC_2024_07;
-USE AM_JDBC_2024_07;
+DROP DATABASE IF EXISTS `AM_JDBC_2024_07`;
+CREATE DATABASE `AM_JDBC_2024_07`;
+USE `AM_JDBC_2024_07`;
 
 CREATE TABLE article (
                          id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -9,10 +10,20 @@ CREATE TABLE article (
                          `body` TEXT NOT NULL
 );
 
+create table `member` (
+                        id int(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                        regDate DATETIME NOT NULL,
+                        updateDate DATETIME NOT NULL,
+                        loginId VARCHAR(100) UNIQUE NOT NULL,
+                        loginPw VARCHAR(100) NOT NULL,
+                        name VARCHAR(100) NOT NULL
+);
+
+
 SELECT * FROM article;
+SELECT * FROM `member`;
 
-DROP TABLE article;
-
+#####################################################################
 SELECT '제목1';
 
 SELECT CONCAT ('제목', '1'); ##### 문자열 더하기

@@ -13,10 +13,10 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class App {
+    private static Member loginedMember = null;
 
     public void run() {
-
-        System.out.println("==프로그램 시작==");
+        System.out.println("== 프로그램 시작 ==");
         Scanner sc = new Scanner(System.in);
 
         while (true) {
@@ -39,7 +39,7 @@ public class App {
                 int actionResult = doAction(conn, sc, cmd);
 
                 if (actionResult == -1) {
-                    System.out.println("==프로그램 종료==");
+                    System.out.println("== 프로그램 종료 ==");
                     sc.close();
                     break;
                 }
@@ -59,8 +59,9 @@ public class App {
     }
 
     private static int doAction(Connection conn, Scanner sc, String cmd) {
+
         if (cmd.equals("exit")) {
-            System.out.println("==프로그램 종료==");
+            System.out.println("== 프로그램 종료 ==");
             return -1;
         }
 
@@ -251,11 +252,92 @@ public class App {
             System.out.printf("제목 : %s\n", article.getTitle());
             System.out.printf("내용 : %s\n", article.getBody());
 
+        } else if (cmd.equals("member join")) {
+            System.out.println("== 회원가입 ==");
+            String loginId = null;
+            while (true) {
+                System.out.print("아이디 : ");
+                loginId = sc.nextLine().trim();
+
+                if (loginId.isEmpty() || loginId.contains(" ")) {
+                    System.out.println("아이디를 입력해주세요.");
+                    continue;
+                }
+
+                SecSql sql = new SecSql();
+                sql.append("SELECT COUNT(*) > 0 FROM `member` WHERE loginId = '" + loginId + "';");
+
+                boolean isLoginIdDup = DBUtil.selectRowBooleanValue(conn, sql);
+
+                if (isLoginIdDup) {
+                    System.out.printf("[%s] 아이디는(은) 이미 사용중입니다.\n", loginId);
+                    continue;
+                }
+                break;
+            }
+            String loginPw = null;
+            while (true) {
+                System.out.print("비밀번호 : ");
+                loginPw = sc.nextLine().trim();
+
+                if (loginPw.isEmpty() || loginPw.contains(" ")) {
+                    System.out.println("비밀번호를 입력해주세요.");
+                    continue;
+                }
+
+                boolean loginPwCheck = true;
+
+                while (true) {
+                    System.out.print("비밀번호 확인 : ");
+                    String checkLoginPw = sc.nextLine().trim();
+
+                    if (checkLoginPw.isEmpty() || checkLoginPw.contains(" ")) {
+                        System.out.println("비밀번호 확인을 입력해주세요.");
+                        continue;
+                    }
+
+                    if (!loginPw.equals(checkLoginPw)) {
+                        System.out.println("비밀번호와 확인이 일치하지 않습니다.");
+                        loginPwCheck = false;
+                    }
+                    break;
+                }
+                if (loginPwCheck) {
+                    break;
+                }
+
+            }
+            String name = null;
+            while (true) {
+                System.out.print("이름 : ");
+                name = sc.nextLine();
+
+                if (name.isEmpty() || name.contains(" ")) {
+                    System.out.println("이름을 입력해주세요.");
+                    continue;
+                }
+                break;
+            }
+
+            SecSql sql = new SecSql();
+            sql.append("INSERT INTO `member`");
+            sql.append("SET regDate = NOW(),");
+            sql.append("SET updateDate = NOW(),");
+            sql.append("loginId = '" + loginId + "',");
+            sql.append("loginPw = '" + loginPw + "',");
+            sql.append("name = '" + name + "';");
+
+            int id = DBUtil.insert(conn, sql);
+
+            System.out.printf("[%s]님 환영합니다.\n", name);
+
         } else {
             System.out.println("올바르지 않은 명령어입니다.");
         }
         return 0;
+
     }
+
 }
 
 
