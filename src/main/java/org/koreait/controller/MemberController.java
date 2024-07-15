@@ -123,6 +123,11 @@ public class MemberController extends Controller {
             break;
         }
         while (true) {
+            if (memberService.loginLimit() == 1) {
+                System.out.println("로그인 3번 실패");
+                memberService.loginFailCountReset();
+                return;
+            }
 
             System.out.print("비밀번호 입력 : ");
             String enterLoginPw = Container.getScanner().nextLine();
