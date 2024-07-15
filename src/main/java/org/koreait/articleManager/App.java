@@ -1,4 +1,4 @@
-package org.koreait;
+package org.koreait.articleManager;
 
 import org.koreait.controller.ArticleController;
 import org.koreait.controller.MemberController;
@@ -6,17 +6,15 @@ import org.koreait.controller.MemberController;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Scanner;
 
 public class App {
 
     public void run() {
         System.out.println("== 프로그램 시작 ==");
-        Scanner sc = new Scanner(System.in);
 
         while (true) {
             System.out.print("명령어 > ");
-            String cmd = sc.nextLine().trim();
+            String cmd = Container.getScanner().nextLine().trim();
 
             Connection conn = null;
 
@@ -31,11 +29,11 @@ public class App {
             try {
                 conn = DriverManager.getConnection(url, "root", "");
 
-                int actionResult = action(conn, sc, cmd);
+                int actionResult = action(conn, cmd);
 
                 if (actionResult == -1) {
                     System.out.println("== 프로그램 종료 ==");
-                    sc.close();
+                    Container.close();
                     break;
                 }
 
@@ -53,19 +51,19 @@ public class App {
         }
     }
 
-    private static int action(Connection conn, Scanner sc, String cmd) {
+    private static int action(Connection conn, String cmd) {
         if (cmd.equals("exit")) {
             System.out.println("== 프로그램 종료 ==");
             return -1;
         }
 
-        ArticleController articleController = new ArticleController(sc, conn);
-        MemberController memberController = new MemberController(sc, conn);
+        ArticleController articleController = new ArticleController(conn);
+        MemberController memberController = new MemberController(conn);
 
         if (cmd.equals("article write")) {
             articleController.doWrite();
-        } else if (cmd.equals("article list")) {
-            articleController.showList();
+        } else if (cmd.startsWith("article list")) {
+            articleController.showList(cmd);
         } else if (cmd.startsWith("article modify")) {
             articleController.doModify(cmd);
         } else if (cmd.startsWith("article detail")) {

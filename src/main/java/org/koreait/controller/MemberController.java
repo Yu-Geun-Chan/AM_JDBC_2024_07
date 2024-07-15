@@ -1,27 +1,20 @@
 package org.koreait.controller;
 
+import org.koreait.articleManager.Container;
 import org.koreait.dto.Member;
 import org.koreait.service.MemberService;
-import org.koreait.util.DBUtil;
-import org.koreait.util.SecSql;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
 
 public class MemberController extends Controller {
-    private Scanner sc;
     private Connection conn;
 
     private MemberService memberService;
 
-    public MemberController(Scanner sc, Connection conn) {
-        this.sc = sc;
+    public MemberController(Connection conn) {
         this.conn = conn;
-        this.memberService = new MemberService();
+        this.memberService = new MemberService(conn);
     }
 
     public void doJoin() {
@@ -29,7 +22,7 @@ public class MemberController extends Controller {
         String loginId = null;
         while (true) {
             System.out.print("아이디 : ");
-            loginId = sc.nextLine().trim();
+            loginId = Container.getScanner().nextLine().trim();
 
             if (loginId.isEmpty() || loginId.contains(" ")) {
                 System.out.println("아이디를 입력해주세요.");
@@ -47,7 +40,7 @@ public class MemberController extends Controller {
         String loginPw = null;
         while (true) {
             System.out.print("비밀번호 : ");
-            loginPw = sc.nextLine().trim();
+            loginPw = Container.getScanner().nextLine().trim();
 
             if (loginPw.isEmpty() || loginPw.contains(" ")) {
                 System.out.println("비밀번호를 입력해주세요.");
@@ -58,7 +51,7 @@ public class MemberController extends Controller {
 
             while (true) {
                 System.out.print("비밀번호 확인 : ");
-                String checkLoginPw = sc.nextLine().trim();
+                String checkLoginPw = Container.getScanner().nextLine().trim();
 
                 if (checkLoginPw.isEmpty() || checkLoginPw.contains(" ")) {
                     System.out.println("비밀번호 확인을 입력해주세요.");
@@ -79,7 +72,7 @@ public class MemberController extends Controller {
         String name = null;
         while (true) {
             System.out.print("이름 : ");
-            name = sc.nextLine();
+            name = Container.getScanner().nextLine();
 
             if (name.isEmpty() || name.contains(" ")) {
                 System.out.println("이름을 입력해주세요.");
@@ -88,15 +81,7 @@ public class MemberController extends Controller {
             break;
         }
 
-        SecSql sql = new SecSql();
-        sql.append("INSERT INTO `member`");
-        sql.append("SET regDate = NOW(),");
-        sql.append("updateDate = NOW(),");
-        sql.append("loginId = '" + loginId + "',");
-        sql.append("loginPw = '" + loginPw + "',");
-        sql.append("name = '" + name + "';");
-
-        int id = DBUtil.insert(conn, sql);
+        int id = memberService.doJoin(loginId, loginPw, name);
 
         System.out.printf("[%s]님 환영합니다.\n", name);
     }
@@ -108,45 +93,63 @@ public class MemberController extends Controller {
         }
 
         System.out.println("== 로그인 ==");
-        List<Member> members = new ArrayList<Member>();
+
+        String enterLoginId = null;
+        Member member = null;
 
         while (true) {
-            System.out.print("아이디 입력 : ");
-            String enterLoginId = sc.nextLine();
-            System.out.print("비밀번호 입력 : ");
-            String enterLoginPw = sc.nextLine();
-            SecSql sql = new SecSql();
-            sql.append("SELECT * FROM member;");
 
-            List<Map<String, Object>> memberListMap = DBUtil.selectRows(conn, sql);
+            System.out.print("로그인 아이디 입력 : ");
+            enterLoginId = Container.getScanner().nextLine();
 
-            for (Map<String, Object> memberMap : memberListMap) {
-                members.add(new Member(memberMap));
-            }
-
-            Member member = null;
-
-            for (Member m : members) {
-                if (m.getLoginId().equals(enterLoginId)) {
-                    member = m;
-                }
+            if (enterLoginId.startsWith("backspace")) {
                 break;
             }
 
-            if (member == null) {
-                System.out.printf("[%s]은(는) 존재하지 않는 아이디 입니다.\n", enterLoginId);
+            if (enterLoginId.isEmpty() || enterLoginId.contains(" ")) {
+                System.out.println("아이디를 입력해주세요.");
+                continue;
+            }
+
+            boolean isLoginIdDup = memberService.isLoginIdDup(conn, enterLoginId);
+
+            if (!isLoginIdDup) {
+                System.out.printf("[%s]는(은) 존재하지 않는 아이디 입니다.\n", enterLoginId);
+                continue;
+            }
+
+            member = memberService.getMemberLoginId(enterLoginId);
+
+            break;
+        }
+        while (true) {
+            if (memberService.loginLimit() == 1) {
+                System.out.println("로그인 3번 실패");
+                memberService.loginFailCountReset();
+                return;
+            }
+
+            System.out.print("비밀번호 입력 : ");
+            String enterLoginPw = Container.getScanner().nextLine();
+            if (enterLoginPw.startsWith("backspace")) {
+                break;
+            }
+
+            if (enterLoginPw.isEmpty() || enterLoginPw.contains(" ")) {
+                System.out.println("비밀번호를 입력해주세요.");
+                memberService.loginFailCount(enterLoginId);
                 continue;
             }
 
             if (!member.getLoginPw().equals(enterLoginPw)) {
                 System.out.println("비밀번호를 확인해주세요.");
+                memberService.loginFailCount(enterLoginId);
                 continue;
             }
-
-            loginedMember = member;
-            System.out.printf("[%s]님 환영합니다.\n", loginedMember.getName());
             break;
         }
+        loginedMember = member;
+        System.out.printf("[%s]님 환영합니다.\n", loginedMember.getName());
     }
 
     public void doLogout() {
@@ -156,5 +159,11 @@ public class MemberController extends Controller {
         }
 
         loginedMember = null;
+
+        System.out.println("로그아웃 되었습니다.");
     }
 }
+
+
+
+
