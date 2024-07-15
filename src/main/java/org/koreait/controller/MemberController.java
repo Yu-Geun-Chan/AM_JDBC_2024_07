@@ -54,7 +54,7 @@ public class MemberController extends Controller {
                 String checkLoginPw = Container.getScanner().nextLine().trim();
 
                 if (checkLoginPw.isEmpty() || checkLoginPw.contains(" ")) {
-                    System.out.println("비밀번호 확인을 입력해주세요.");
+                    System.out.printf("비밀번호 확인을 입력해주세요.");
                     continue;
                 }
 
@@ -124,7 +124,7 @@ public class MemberController extends Controller {
         }
         while (true) {
             if (memberService.loginLimit() == 1) {
-                System.out.println("로그인 3번 실패");
+                System.out.println("비밀번호 오류 3번");
                 memberService.loginFailCountReset();
                 return;
             }
@@ -136,14 +136,14 @@ public class MemberController extends Controller {
             }
 
             if (enterLoginPw.isEmpty() || enterLoginPw.contains(" ")) {
-                System.out.println("비밀번호를 입력해주세요.");
                 memberService.loginFailCount(enterLoginId);
+                System.out.println("비밀번호를 입력해주세요.");
                 continue;
             }
 
             if (!member.getLoginPw().equals(enterLoginPw)) {
-                System.out.println("비밀번호를 확인해주세요.");
                 memberService.loginFailCount(enterLoginId);
+                System.out.println("비밀번호를 확인해주세요.");
                 continue;
             }
             break;
@@ -162,8 +162,17 @@ public class MemberController extends Controller {
 
         System.out.println("로그아웃 되었습니다.");
     }
+
+    public void showProfile() {
+        if (loginedMember == null) {
+            System.out.println("로그인 후 이용해주세요.");
+            return;
+        }
+
+        System.out.println("== 회원정보 ==");
+        System.out.printf("회원가입날짜: %s\n", loginedMember.getRegDate());
+        System.out.printf("회원번호 : %d\n", loginedMember.getId());
+        System.out.printf("아이디 : %s\n", loginedMember.getLoginId());
+        System.out.printf("이름 : %s\n", loginedMember.getName());
+    }
 }
-
-
-
-

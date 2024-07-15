@@ -76,6 +76,8 @@ public class App {
             memberController.doLogin();
         } else if (cmd.equals("member logout")) {
             memberController.doLogout();
+        } else if (cmd.equals("member profile")) {
+            memberController.showProfile();
         } else {
             System.out.println("올바르지 않은 명령어입니다.");
         }
