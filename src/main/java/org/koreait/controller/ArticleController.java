@@ -72,13 +72,7 @@ public class ArticleController extends Controller {
             System.out.println("숫자를 입력하세요");
             return;
         }
-
-        Article article = articleService.getArticleById(id);
-
-        if (article == null) {
-            System.out.printf("%d번 게시글은 없습니다.\n", id);
-            return;
-        }
+        
 
         System.out.printf("번호 : %d\n", article.getId());
         System.out.printf("작성일 : %s\n", article.getRegDate());
