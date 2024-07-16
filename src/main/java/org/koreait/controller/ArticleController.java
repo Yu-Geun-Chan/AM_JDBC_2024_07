@@ -29,7 +29,9 @@ public class ArticleController extends Controller {
         System.out.print("내용 : ");
         String body = Container.getScanner().nextLine();
 
-        int id = articleService.doWrite(title, body);
+        int memberId = loginedMember.getId();
+
+        int id = articleService.doWrite(memberId, title, body);
 
         System.out.printf("%d번 게시글이 작성되었습니다.\n", id);
     }
@@ -49,7 +51,7 @@ public class ArticleController extends Controller {
         System.out.println("  번호  /     작성일     /   작성자   /    제목     /     내용    ");
         System.out.println("=".repeat(70));
         for (Article article : foundArticles) {
-            String writerName = article.getLoginId();
+            String writerName = article.getName();
             if (DateUtil.getNow().split(" ")[0].equals(article.getRegDate().split(" ")[0])) {
                 System.out.printf("   %d   /    %s    /    %s    /    %s    /    %s     \n", article.getId(), article.getRegDate().split(" ")[1], writerName, article.getTitle(), article.getBody());
             } else
@@ -62,29 +64,26 @@ public class ArticleController extends Controller {
 
         String[] cmdBits = cmd.split(" ");
 
-        int id;
+        int id = 0;
 
         try {
             id = Integer.parseInt(cmdBits[2]);
-        } catch (NumberFormatException | NullPointerException e) {
+        } catch (Exception e) {
             System.out.println("숫자를 입력하세요");
             return;
         }
 
-        Map<String, Object> articleMap = articleService.getArticleById(id);
+        Article article = articleService.getArticleById(id);
 
-        if (articleMap.isEmpty()) {
+        if (article == null) {
             System.out.printf("%d번 게시글은 없습니다.\n", id);
             return;
         }
 
-        Article article = new Article(articleMap);
-        String writerName = article.getLoginId();
-
         System.out.printf("번호 : %d\n", article.getId());
         System.out.printf("작성일 : %s\n", article.getRegDate());
         System.out.printf("수정일 : %s\n", article.getUpdateDate());
-        System.out.printf("작성자 : %s\n", writerName);
+        System.out.printf("작성자 : %s\n", article.getName());
         System.out.printf("제목 : %s\n", article.getTitle());
         System.out.printf("내용 : %s\n", article.getBody());
     }
@@ -98,25 +97,23 @@ public class ArticleController extends Controller {
 
         String[] cmdBits = cmd.split(" ");
 
-        int id;
+        int id = 0;
 
         try {
             id = Integer.parseInt(cmdBits[2]);
-        } catch (NumberFormatException | NullPointerException e) {
+        } catch (Exception  e) {
             System.out.println("숫자를 입력하세요");
             return;
         }
 
-        Map<String, Object> articleMap = articleService.getArticleById(id);
+        Article article = articleService.getArticleById(id);
 
-        if (articleMap.isEmpty()) {
+        if (article == null) {
             System.out.printf("%d번 게시글은 없습니다.\n", id);
             return;
         }
 
-        Article article = new Article(articleMap);
-
-        if (!article.getLoginId().equals(loginedMember.getLoginId())) {
+        if (article.getMemberId() != loginedMember.getId()) {
             System.out.println("해당 게시글에 대한 권한이 없습니다.");
             return;
         }
@@ -138,41 +135,28 @@ public class ArticleController extends Controller {
             System.out.println("로그인 후 이용해주세요.");
             return;
         }
-        System.out.println("== 게시글 삭제 ==");
 
         String[] cmdBits = cmd.split(" ");
 
-        int id;
+        int id = 0;
 
         try {
             id = Integer.parseInt(cmdBits[2]);
-        } catch (NumberFormatException | NullPointerException e) {
+        } catch (Exception e) {
             System.out.println("숫자를 입력하세요.");
             return;
         }
 
-        Map<String, Object> articleMap = articleService.getArticleById(id);
+        Article article = articleService.getArticleById(id);
 
-        if (articleMap.isEmpty()) {
+        if (article == null) {
             System.out.printf("%d번 게시글은 없습니다.\n", id);
             return;
         }
 
-        Article article = new Article(articleMap);
+        System.out.println("== 게시글 삭제 ==");
 
-        if (!article.getLoginId().equals(loginedMember.getLoginId())) {
-            System.out.println("해당 게시글에 대한 권한이 없습니다.");
-            return;
-        }
-
-        int foundArticleId = 0;
-
-        foundArticleId = articleService.doDelete(id);
-
-        if (foundArticleId == 0) {
-            System.out.printf("%d번 게시글은 없습니다.\n", id);
-            return;
-        }
+        articleService.doDelete(id);
 
         System.out.printf("%d번 게시글은 삭제되었습니다.\n", id);
     }
