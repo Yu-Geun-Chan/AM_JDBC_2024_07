@@ -6,6 +6,7 @@ import org.koreait.dto.Article;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,22 +38,23 @@ public class ArticleService {
     }
 
     public List<Article> getForPrintArticles(String searchWord) {
-        List<Article> forPrintArticles = new ArrayList<>();
+
+        List<Article> articles = new ArrayList<>();
 
         if (!searchWord.isEmpty() || searchWord != null) {
             System.out.printf("검색어 : %s\n",searchWord);
 
             for (Article article : articleDao.getArticles()) {
                 if (article.getTitle().contains(searchWord)) {
-                    forPrintArticles.add(article);
+                    articles.add(article);
                 }
             }
-            if (forPrintArticles.isEmpty()) {
+            if (articles.isEmpty()) {
                 System.out.println("해당 게시글이 없습니다.");
-                return forPrintArticles;
+                return articles;
             }
         }
-        return forPrintArticles;
+        return articles;
     }
 
     public int getSize() {

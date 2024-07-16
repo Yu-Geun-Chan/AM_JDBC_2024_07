@@ -39,6 +39,8 @@ public class ArticleController extends Controller {
     public void showList(String cmd) {
         System.out.println("== 게시글 목록 ==");
 
+        String[] cmdBits = cmd.split(" ");
+        
         if (articleService.getSize() == 0) {
             System.out.println("작성된 게시글이 없습니다.");
             return;
@@ -46,16 +48,15 @@ public class ArticleController extends Controller {
 
         String searchWord = cmd.substring("article list".length()).trim();
 
-        List<Article> foundArticles = articleService.getForPrintArticles(searchWord);
+        List<Article> articles = articleService.getForPrintArticles(searchWord);
 
         System.out.println("  번호  /     작성일     /   작성자   /    제목     /     내용    ");
         System.out.println("=".repeat(70));
-        for (Article article : foundArticles) {
-            String writerName = article.getName();
+        for (Article article : articles) {
             if (DateUtil.getNow().split(" ")[0].equals(article.getRegDate().split(" ")[0])) {
-                System.out.printf("   %d   /    %s    /    %s    /    %s    /    %s     \n", article.getId(), article.getRegDate().split(" ")[1], writerName, article.getTitle(), article.getBody());
+                System.out.printf("   %d   /    %s    /    %s    /    %s    /    %s     \n", article.getId(), article.getRegDate().split(" ")[1], article.getName(), article.getTitle(), article.getBody());
             } else
-                System.out.printf("   %d   /    %s    /    %s    /    %s    /    %s     \n", article.getId(), article.getRegDate().split(" ")[0], writerName, article.getTitle(), article.getBody());
+                System.out.printf("   %d   /    %s    /    %s    /    %s    /    %s     \n", article.getId(), article.getRegDate().split(" ")[0], article.getName(), article.getTitle(), article.getBody());
         }
     }
 
@@ -100,7 +101,7 @@ public class ArticleController extends Controller {
 
         try {
             id = Integer.parseInt(cmdBits[2]);
-        } catch (Exception  e) {
+        } catch (Exception e) {
             System.out.println("숫자를 입력하세요");
             return;
         }
