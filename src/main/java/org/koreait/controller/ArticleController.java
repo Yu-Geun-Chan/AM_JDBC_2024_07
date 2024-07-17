@@ -7,7 +7,7 @@ import org.koreait.util.DateUtil;
 
 import java.sql.Connection;
 import java.util.List;
-import java.util.Map;
+
 
 public class ArticleController extends Controller {
     private Connection conn;
@@ -40,7 +40,7 @@ public class ArticleController extends Controller {
         System.out.println("== 게시글 목록 ==");
 
         String[] cmdBits = cmd.split(" ");
-        
+
         if (articleService.getSize() == 0) {
             System.out.println("작성된 게시글이 없습니다.");
             return;
